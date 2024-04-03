@@ -15,11 +15,10 @@ This function should detect when a bug has resulted in an improper chess board.
 """
 
 
-def is_valid_dashboard(board):
-    """
-    Create the official board
-    """
-    flag = True
+def is_valid_dashboard(board) -> bool:
+    """Validate if a current position is valid"""
+    # Create the official board
+    is_valid = True
     official_board = {}
     ROWS = 8
     COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -27,32 +26,31 @@ def is_valid_dashboard(board):
         for cell in range(ROWS):
             # print(f"{cell+1}{COLUMNS[row]}")
             official_board[f"{cell+1}{COLUMNS[row]}"] = " "
-    if flag is True:
-        flag = validate_pieces_position(board, official_board)
-    if flag is True:
-        flag = validate_total_pieces(board)
+    if is_valid is True:
+        is_valid = validate_pieces_position(board, official_board)
+    if is_valid is True:
+        is_valid = validate_total_pieces(board)
 
-    return flag
+    return is_valid
 
 
-def validate_pieces_position(board, official_board):
+def validate_pieces_position(board, official_board) -> bool:
     """
     Validate if the board has the correct arithmetic notation
     """
-    flag = True
+    is_valid = True
     for k in board.keys():
         if k not in official_board.keys():
             # print(f"The position {k} is invalid")
-            flag = False
-    return flag
-    # TODO, add Exception
+            is_valid = False
+    return is_valid
 
 
-def validate_total_pieces(board):
+def validate_total_pieces(board) -> bool:
     """
     Separate color pieces and count total number of pieces for each side
     """
-    flag = True
+    is_valid = True
     side_pieces = {}
     total_white_pieces = 0
     total_black_pieces = 0
@@ -69,22 +67,22 @@ def validate_total_pieces(board):
         # print(total_black_pieces)
         # print(total_white_pieces)
         # print("you have a lot pieces")
-        flag = False
+        is_valid = False
         # Validate correct number of kings(1 each side) and pawns(16 each side) only
     for piece in side_pieces.keys():
         if piece == "wking" and side_pieces["wking"] > 1:
             # print("white you have more than one king")
-            flag = False
+            is_valid = False
         elif piece == "bking" and side_pieces["bking"] > 1:
             # print("black you have more than one king")
-            flag = False
+            is_valid = False
         elif piece == "wpawn" and side_pieces["wpawn"] > 8:
             # print("white you have more than eight pawn")
-            flag = False
+            is_valid = False
         elif piece == "bpawn" and side_pieces["bpawn"] > 8:
             # print("black you have more than eight pawn")
-            flag = False
-    return flag
+            is_valid = False
+    return is_valid
 
 
 # valid Dashboard
@@ -124,4 +122,4 @@ i_current_board_position = {
     "3z": "wking",
 }
 
-print(is_valid_dashboard(i_current_board_position))
+print(is_valid_dashboard(v_current_board_position))
