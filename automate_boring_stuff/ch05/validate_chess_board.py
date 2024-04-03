@@ -1,6 +1,4 @@
 # validate_chess_board
-import sys
-
 """
 In this chapter, we used the dictionary value
 {'1h': 'bking', '6c': 'wqueen', '2g': 'bbishop', '5h': 'bqueen', '3e': 'wking'}
@@ -18,8 +16,10 @@ This function should detect when a bug has resulted in an improper chess board.
 
 
 def is_valid_dashboard(board):
+    """
+    Create the official board
+    """
     flag = True
-    # Create the official board
     official_board = {}
     ROWS = 8
     COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -27,15 +27,32 @@ def is_valid_dashboard(board):
         for cell in range(ROWS):
             # print(f"{cell+1}{COLUMNS[row]}")
             official_board[f"{cell+1}{COLUMNS[row]}"] = " "
+    if flag is True:
+        flag = validate_pieces_position(board, official_board)
+    if flag is True:
+        flag = validate_total_pieces(board)
 
-    # Validate if the board has the correct arithmetic notation
+    return flag
+
+
+def validate_pieces_position(board, official_board):
+    """
+    Validate if the board has the correct arithmetic notation
+    """
+    flag = True
     for k in board.keys():
         if k not in official_board.keys():
             # print(f"The position {k} is invalid")
             flag = False
+    return flag
     # TODO, add Exception
 
-    # Separate color pieces and count total number of pieces for each side
+
+def validate_total_pieces(board):
+    """
+    Separate color pieces and count total number of pieces for each side
+    """
+    flag = True
     side_pieces = {}
     total_white_pieces = 0
     total_black_pieces = 0
@@ -53,9 +70,7 @@ def is_valid_dashboard(board):
         # print(total_white_pieces)
         # print("you have a lot pieces")
         flag = False
-    # print(side_pieces)
-
-    # Validate correct number of kings(1 each side) and pawns(16 each side) only
+        # Validate correct number of kings(1 each side) and pawns(16 each side) only
     for piece in side_pieces.keys():
         if piece == "wking" and side_pieces["wking"] > 1:
             # print("white you have more than one king")
@@ -109,4 +124,4 @@ i_current_board_position = {
     "3z": "wking",
 }
 
-print(is_valid_dashboard(v_current_board_position))
+print(is_valid_dashboard(i_current_board_position))
