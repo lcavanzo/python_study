@@ -34,5 +34,25 @@ email_regex = re.compile(
     )""",
     re.VERBOSE,
 )
-# TODO: Find matches in a clipboard text.
-# TODO: Copy results to the clipboard
+
+# Find matches in a clipboard text.
+text = str(pyperclip.paste())
+
+matches = []
+for groups in phone_regex.findall(text):
+    phone_num = "-".join([groups[1], groups[3], groups[5]])
+    if groups[6] != "":
+        phone_num += " x" + groups[6]
+    if len(phone_num) > 9:
+        matches.append(phone_num)
+
+for groups in email_regex.findall(text):
+    matches.append(groups[0])
+
+# Copy results to the clipboard
+if len(matches) > 0:
+    pyperclip.copy("\n".join(matches))
+    print("---------- Copied to clipboard ----------------")
+    print("\n".join(matches))
+else:
+    print("No phone number or email addresses found ")
