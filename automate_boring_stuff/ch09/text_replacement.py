@@ -1,4 +1,5 @@
-#! python3
+#!python3
+
 '''
 text_replacement.py -  reads in text files and lets the user add their
    own text anywhere the word ADJECTIVE, NOUN, ADVERB, or VERB
@@ -6,21 +7,23 @@ text_replacement.py -  reads in text files and lets the user add their
 '''
 import re
 
-#TODO: Read text file
-with open("text_file.txt", 'r') as file:
+# Getting content of the file
+with open("text_file.txt", 'r', encoding="utf-8") as file:
+    content = file.read()
 
-#TODO: Look for ADJECTIVE,NOUN,ADVERB or VERB in the file provided
-#TEST: create regex for matching the words then replace them in a for loop ???
-    WORDS = ['ADJECTIVE','NOUN','ADVERB','VERB']
-    print(WORDS)
-    for line in file:
-        for word in line.split():
-            if word in WORDS:
-                ans = input(f'Enter a {word.upper()}: ')
+W_REGEX = re.compile(r'\bADJECTIVE\b|\bNOUN\b|\bVERB\b|\bADVERB\b')
 
-        print(line)
+while True:
+    match = W_REGEX.search(content)
+    ans = ''
+    if match is None:
+        break
+    elif match.group() == "ADJECTIVE" or  match.group() == "ADVERB":
+        ans = input(f"Enter an {match.group()}: ")
+    elif match.group() == "NOUN" or  match.group() == "VERB":
+        ans = input(f"Enter a {match.group()}: ")
+    content = re.sub(W_REGEX,ans, content, 1)
+print(content)
 
-#TODO: Ask words for replace the ADV, NOUN, ADVER or VERB
-#TODO: Print new sentences
-#TODO: Save sentences to a file
-
+with open('return_text_file.txt', 'w', encoding='utf-8') as file:
+    file.write(content)
