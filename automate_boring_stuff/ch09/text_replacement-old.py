@@ -1,4 +1,5 @@
 #!python3
+
 '''
 text_replacement.py -  reads in text files and lets the user add their
    own text anywhere the word ADJECTIVE, NOUN, ADVERB, or VERB
