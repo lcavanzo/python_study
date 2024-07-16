@@ -19,10 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY  keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-2_1+(79**1w@gd+vt2#posk%3&&xl=4q5h2v(t3@2cm7-e!uo_'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY  don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -137,4 +137,5 @@ LOGIN_URL = 'users:login'
 
 # Heroku settings
 import django_heroku
+
 django_heroku.settings(local())
