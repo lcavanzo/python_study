@@ -20,7 +20,7 @@ if len(sys.argv) != 3:
 
 def search_files(dir, ext) -> None:
     """
-    Searching for files within a directory
+    Search for files within a directory and sort them based on their numeric suffix.
     """
     dir = os.path.abspath(dir)
     print(f"Renaming files in {dir}...")
@@ -36,7 +36,7 @@ def search_files(dir, ext) -> None:
 
 def create_missing_file(dir, basename, numbers_list, extension):
     """
-    pass
+    Rename files to close gaps in their numbering.
     """
     print(f"{basename} {numbers_list} {extension}")
     old_list = numbers_list.copy()
@@ -58,7 +58,7 @@ def create_missing_file(dir, basename, numbers_list, extension):
 
 def extract_number(filename):
     """
-    pass
+    Extract the numeric part of a filename.
     """
     pattern = r'([a-zA-Z]+)(\d+)(\.[a-z]+)'
     match = re.search(pattern, filename)
