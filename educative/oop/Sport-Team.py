@@ -57,43 +57,65 @@ class Player:
 class Team:
     """docstring for ClassName."""
 
-    def __init__(self, name):
+    def __init__(self, name, players):
         self.name = name
-        self.players = []
+        self.players = players
 
     def addPlayers(self, player):
         self.players.append(player)
 
     def getPlayers(self):
-        print(len(self.players))
+        return len(self.players)
 
 
 class School:
     """docstring for School."""
 
-    def __init__(self, name):
-        self.teams = []
+    def __init__(self, name, teams):
+        self.teams = teams
         self.name = name
 
-    def getTotalPlayersInSchool(self):
-        print(len(name))
-
     def addTeam(self, team):
-        print(self.teams.append(team))
+        self.teams.append(team)
+
+    def getTotalPlayersInSchool(self):
+        print("Player ID's\tPlayer Names\tTeams")
+        for team in self.teams:
+            for player in team.players:
+                print(f"{player.ID}\t\t{player.name}\t\t{player.teamName}")
 
 
+# Players
 p1 = Player("1", "Red", "Harris")
 p2 = Player("2", "Red", "Carol")
-p3 = Player("3", "Blue", "Johny")
-p4 = Player("4", "Blue", "Sarah")
+p3 = Player("1", "Blue", "Johny")
+p4 = Player("2", "Blue", "Sarah")
 
-red = Team("red")
-red.getPlayers()
+# Teams
+rteam = []
+bteam = []
+red = Team("red", rteam)
+print(f"Red team: {red.getPlayers()}")
+print("Adding players to red team")
 red.addPlayers(p1)
 red.addPlayers(p2)
 red.getPlayers()
-blue = Team("blue")
-blue.getPlayers()
+print(f"Red team: {red.getPlayers()}")
+print()
+blue = Team("blue", bteam)
+print(f"Blue team: {blue.getPlayers()}")
+print("Adding players to blue team")
 blue.addPlayers(p3)
 blue.addPlayers(p4)
 blue.getPlayers()
+print(f"Blue team: {blue.getPlayers()}")
+
+# Schools
+print()
+s1teams = []
+s1 = School("FF", s1teams)
+print(f"School: {s1.name}, school's teams: {len(s1.teams)}")
+s1.addTeam(red)
+s1.addTeam(blue)
+print(f"School: {s1.name}, school's teams: {len(s1.teams)}")
+s1.getTotalPlayersInSchool()
