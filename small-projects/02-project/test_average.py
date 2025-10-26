@@ -25,7 +25,7 @@ def test_calculate_average_mixed():
 
 def test_calculate_average_negative():
     """Test with a list of negative numbers."""
-    assert calculate_average([-1, -2, -3, -4, -5]) == -3.0  # Corrected assertion
+    assert calculate_average([-1, -2, -3, -4, -5]) == -3.0
 
 
 def test_calculate_average_empty():
