@@ -1,5 +1,10 @@
 # temperature_converter.py
-def celsius_to_fahrenheit(celsius):
+from typing import Union
+
+
+def celsius_to_fahrenheit(celsius: Union[int, float]) -> float:
     """Converts Celsius to Fahrenheit."""
     # Implement this correctly after writing tests, or make it return 0 initially.
-    return 0
+    if isinstance(celsius, str):
+        raise TypeError("numeric value is needed")
+    return celsius * 9 / 5 + 32
