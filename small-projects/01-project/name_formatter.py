@@ -14,4 +14,4 @@ def format_name(first, last):
         return ""
     if first is None or last is None:
         raise ValueError("Invalid Name")
-    return first.strip() + " " + last.strip()
+    return first.strip("!,. -") + " " + last.strip("-!,. ")
