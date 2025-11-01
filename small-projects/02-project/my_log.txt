@@ -1,2 +1,0 @@
-Application started succesfully.
-User 'admin' logged at 2025-10-27 10:00:00.
