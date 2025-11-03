@@ -19,6 +19,7 @@ webserver-file:
 """
 
 import re
+import hashlib
 
 
 def verify_and_process_log_file(filepath, file_errors):
@@ -51,6 +52,43 @@ def verify_and_process_log_file(filepath, file_errors):
 
     # Step3: Calculate and save hash for errors file
     print(f"\n--- Verifying error log files: {file_errors} ---")
+    error_file_hash = calculate_file_hash(webserver_errors)
+    print(f"\n--- Calculating hash for {file_errors}: {error_file_hash} ---")
+    file_hash = "webserver_errors.log.sha256"
+    with open(file_hash, "w") as h_file:
+        h_file.write(error_file_hash)
+    print(f"\n--- Saving hash into a file: {file_hash} ---")
+    with open(file_hash, "r") as f:
+        content = f.read()
+    print(content)
+
+
+def calculate_file_hash(filepath, algorithm="sha256", block_size=65536):
+    """
+    Calculates the hash of a file using the specified algorithm.
+    """
+    try:
+        if algorithm == "sha256":
+            hasher = hashlib.sha256()
+        elif algorithm == "md5":
+            hasher = hashlib.md5()
+        else:
+            raise ValueError("Unsupported hashing algorithm. Choose 'md5' or 'sha256'.")
+        with open(filepath, "rb") as f:
+            while True:
+                buffer = f.read(block_size)
+                if not buffer:
+                    break
+                hasher.update(buffer)
+        return hasher.hexdigest()
+    except FileNotFoundError:
+        return None
+    except IOError:
+        return None
+    except ValueError:
+        return None
+    except Exception:
+        return None
 
 
 def filter_errors(logfile, file_errors):
