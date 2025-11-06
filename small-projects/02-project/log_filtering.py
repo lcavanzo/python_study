@@ -14,53 +14,66 @@ webserver-file:
 - [x] - Create a function to read the webserver.log file
 - [x] - Filter out 2xx requests
 - [x] - Send non-2xx to a new errors.log file
-- [ ] - Calculate SHA256 for error.log file
-- [ ] - Save SHA256 value into error.log.sha256 file
+- [X] - Calculate SHA256 for error.log file
+- [X] - Save SHA256 value into error.log.sha256 file
 """
 
+import os
 import re
 import hashlib
 
 
-def verify_and_process_log_file(filepath, file_errors):
+def read_file(file, mode="r"):
     """
-    Reads a log file.
+    Reads a file
     """
-    # Step1: Read file
-    print(f"--- Verifying log file: {filepath} ---")
-    log = None
+    content = None
     try:
-        with open(filepath) as f:
-            log = f.readlines()
+        with open(file, "r") as f:
+            content = f.read()
     except FileNotFoundError:
-        print(f"Warning: file not found: {filepath}")
+        print(f"Warning: file not found: {file}")
     except IOError as e:
         print(f"Error reading log file: {e}")
+    return content
 
-    # Step2: Create filteres errors file
-    # print(log)
-    if log:
-        filter_errors(log, file_errors)
+
+def verify_and_process_log_file(filepath, error_filepath):
+    """
+    Verify log file
+    """
+    print(f"--- Processing log file: {filepath} ---")
+    log_content = read_file(filepath)
+
+    if log_content:
+        filter_errors(log_content, error_filepath)
     else:
-        print("No errors")
+        print("No content found in primary log file, no errors to process.")
+        return None
 
-    # Validate errrors file -- funtions ?
-    with open(file_errors, "r") as e_file:
-        content = e_file.read()
-    print(f"\n--- Verifying error log files: {file_errors} ---")
-    print(content)
+    print(f"\n--- Calculating SHA256 hash for error log: {error_filepath} ---")
+    calculated_hash = calculate_file_hash(error_filepath)
 
-    # Step3: Calculate and save hash for errors file
-    print(f"\n--- Verifying error log files: {file_errors} ---")
-    error_file_hash = calculate_file_hash(webserver_errors)
-    print(f"\n--- Calculating hash for {file_errors}: {error_file_hash} ---")
-    file_hash = "webserver_errors.log.sha256"
-    with open(file_hash, "w") as h_file:
-        h_file.write(error_file_hash)
-    print(f"\n--- Saving hash into a file: {file_hash} ---")
-    with open(file_hash, "r") as f:
-        content = f.read()
-    print(content)
+    if calculated_hash:
+        hash_filename = f"{error_filepath}.sha256"
+        try:
+            with open(hash_filename, "w") as h_file:
+                h_file.write(calculated_hash)
+                # h_file.write("a") # testing an error
+            print(f"--- SHA256 hash saved to: {hash_filename} ---")
+        except IOError as e:
+            print(f"Error saving hash to file {hash_filename}: {e}")
+    else:
+        print(
+            f"Could not calculate hash for {error_filepath}. Skipping hash file creation."
+        )
+    print("---Validating hash...---")
+    hash_filename_content = read_file(f"{error_filepath}.sha256")
+    if calculated_hash == hash_filename_content:
+        print("---Both hashes are equal---")
+    else:
+        print("---Incorrect Hash---")
+        return None
 
 
 def calculate_file_hash(filepath, algorithm="sha256", block_size=65536):
@@ -87,25 +100,30 @@ def calculate_file_hash(filepath, algorithm="sha256", block_size=65536):
         return None
     except ValueError:
         return None
-    except Exception:
+    except Exception as e:
+        print(f"An unexpected error occurred during hash calculation: {e}")
         return None
 
 
-def filter_errors(logfile, file_errors):
+def filter_errors(log_content, file_errors):
     error_messages = []
-    for linenum, line in enumerate(logfile, 1):
+    for line in log_content.splitlines():
         columns = line.split()
         # reversed regex, find not 2xx matches
         if re.search(r"^(?!2\d\d)", columns[-2], re.IGNORECASE):
             error_messages.append(line)
-    with open(file_errors, "w") as f:
-        for error in error_messages:
-            f.write(error)
+    try:
+        with open(file_errors, "w") as f:
+            for error in error_messages:
+                f.write(error + "\n")
+    except IOError as e:
+        print(f"Error writing to error log file {file_errors}: {e}")
 
 
 # --- Demonstration ---
 webserver_file = "webserver_access.log"
 webserver_errors = "webserver_errors.log"
+webserver_errors_hash_file = f"{webserver_errors}.sha256"
 
 ## Create sample file
 with open(webserver_file, "w") as sample_f:
@@ -129,3 +147,17 @@ with open(webserver_file, "w") as sample_f:
     )
 
 verify_and_process_log_file(webserver_file, webserver_errors)
+
+
+try:
+    if os.path.exists(webserver_file):
+        os.remove(webserver_file)
+        print(f"\nCleaned up: {webserver_file}")
+    if os.path.exists(webserver_errors):
+        os.remove(webserver_errors)
+        print(f"Cleaned up: {webserver_errors}")
+    if os.path.exists(webserver_errors_hash_file):
+        os.remove(webserver_errors_hash_file)
+        print(f"Cleaned up: {webserver_errors_hash_file}")
+except OSError as e:
+    print(f"Error during cleanup: {e}")
