@@ -18,16 +18,14 @@ def merged_list(n1, n2):
         print(f"p1:{p1}, p2:{p2}, p3:{p3}")
         print(f"new_List: {new_list}\n")
         if n1[p1] < n2[p2]:
-            p3 = p1
-            new_list.append(n1[p3])
+            new_list.insert(p3, n1[p1])
             p1 += 1
         elif n1[p1] > n2[p2]:
-            p3 = p2
-            new_list.append(n2[p3])
+            new_list.insert(p3, n2[p2])
             p2 += 1
         else:
             break
-    return new_list
+        p3 += 1
 
 
 nums1 = [1, 3, 4, 5]
