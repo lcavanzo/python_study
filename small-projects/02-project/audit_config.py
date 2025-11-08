@@ -3,11 +3,11 @@ Task: Write a function audit_config_file(filepath, baseline_hash_file) that take
 
 - [x] - Read the baseline hash. If the baseline_hash_file does not exist, it should calculate the current hash of filepath, save it to baseline_hash_file, and report that a new baseline was established.
 
-- [ ] - If the baseline_hash_file exists, compare the current hash of filepath with the baseline.
+- [X] - If the baseline_hash_file exists, compare the current hash of filepath with the baseline.
 
-- [ ] - Print a clear message indicating whether the configuration file's integrity passed or failed the audit.
+- [X] - Print a clear message indicating whether the configuration file's integrity passed or failed the audit.
 
-- [ ] - Handle FileNotFoundError for both the config file and the hash file gracefully.
+- [X] - Handle FileNotFoundError for both the config file and the hash file gracefully.
 
 Hint: Adapt the calculate_file_hash and verify_file_integrity functions from the lesson.
 
@@ -16,25 +16,27 @@ Hint: Adapt the calculate_file_hash and verify_file_integrity functions from the
 
 import hashlib
 import json
+import os
 
 
 def verify_file_integrity(filepath, baseline_hash_file):
-    hash_filepath = calculate_hash(filepath)
-    hash_baseline_content = read_file(baseline_hash_file)
-    print(hash_filepath)
-    print(hash_baseline_content)
+    if os.path.exists(filepath):
+        hash_filepath = calculate_hash(filepath)
+        hash_baseline_content = read_file(baseline_hash_file)
 
-    if hash_baseline_content == hash_filepath:
-        print(f"--- File Integrity passed: {filepath} == {baseline_hash_file}---")
-    elif hash_baseline_content is None:
-        print("--- New baseline hash file was established ---")
-        new_baseline_hash = calculate_hash(filepath)
-        with open(baseline_hash_file, "w") as f:
-            f.write(new_baseline_hash)
-        print(new_baseline_hash)
-        print(f"Filename: {baseline_hash_file}")
-    elif hash_baseline_content != hash_filepath:
-        print("--- File Integrity Not Passed, please verify it ---")
+        if hash_baseline_content == hash_filepath:
+            print(f"--- File Integrity passed ---\n{filepath} == {baseline_hash_file}")
+        elif hash_baseline_content is None:
+            print("--- New baseline hash file was established ---")
+            new_baseline_hash = calculate_hash(filepath)
+            with open(baseline_hash_file, "w") as f:
+                f.write(new_baseline_hash)
+            # print(new_baseline_hash)
+            print(f"---File Created---\nFilename: {baseline_hash_file}")
+        elif hash_baseline_content != hash_filepath:
+            print("--- File Integrity Not Passed, please verify it ---")
+    else:
+        print(f"Audit file doesn't Exists: {filepath}")
 
 
 def calculate_hash(filepath, algorithm="sha256", block_size=65536):
@@ -118,7 +120,7 @@ audit_config_data = {
     ],
 }
 
-# with open(audit_file, "w") as f:
-#     json.dump(audit_config_data, f)
-#
+with open(audit_file, "w") as f:
+    json.dump(audit_config_data, f)
+
 verify_file_integrity(audit_file, audit_file_hash)
