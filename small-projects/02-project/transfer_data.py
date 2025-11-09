@@ -129,12 +129,11 @@ else:
 print("\n--- Verifying Integrity ---")
 if original_md5_hash == corrupted_md5_hash:
     print(f"Integrity check PASSED for {BINARY_FILENAME}.")
-    print("This means the corruption simulation may not have worked or was too subtle.")
 else:
     print(f"Integrity check FAILED for {BINARY_FILENAME}. Data has been altered!")
     print(f"Original hash: {original_md5_hash}")
     print(f"Corrupted hash: {corrupted_md5_hash}")
 
 # 6. Optional: Clean up the created file
-# os.remove(BINARY_FILENAME)
+os.remove(BINARY_FILENAME)
 # print(f"\nCleaned up: {BINARY_FILENAME}")
