@@ -20,21 +20,23 @@ Hint: Consider using re.sub() to clean the string before extracting, or a single
 import re
 
 
+HOSTNAME_PATTERN = re.compile(
+    r"^(?:https?://)?"  # Optional protocol (http:// or https://)
+    r"(?:www\.)?"  # Optional www.
+    r"([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\.[a-zA-Z]{2,}|"  # Covers sub.domain.com, domain.co.uk (at least two dots for full domain)
+    r"[a-zA-Z0-9-]+\.[a-zA-Z]{2,})"  # Covers simple domain.com (single dot for domain.tld)
+    r"(?:[:/].*|\?.*)?$"  # Optional port, path, or query string
+)
+
+
 def extract_hostname(url):
     """
     Extracts the hostname from a URL string using regular expressions.
     The hostname should not include http://, https://://, www., or any path/query parameters.
     Returns the hostname string if valid, otherwise None.
     """
-    hostname_pattern = re.compile(
-        r"^(?:https?://)?"  # Optional protocol (http:// or https://)
-        r"(?:www\.)?"  # Optional www.
-        r"([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\.[a-zA-Z]{2,}|"  # Covers sub.domain.com, domain.co.uk (at least two dots for full domain)
-        r"[a-zA-Z0-9-]+\.[a-zA-Z]{2,})"  # Covers simple domain.com (single dot for domain.tld)
-        r"(?:[:/].*|\?.*)?$"  # Optional port, path, or query string
-    )
 
-    match = hostname_pattern.search(url)
+    match = HOSTNAME_PATTERN.search(url)
     if match:
         return match.group(1)
     return None
