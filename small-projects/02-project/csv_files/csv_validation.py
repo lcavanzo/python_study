@@ -148,6 +148,19 @@ def validate_csv(filepath, expected_headers, validation_rules):
             for header, rules in validation_rules.items():
                 if "unique" in rules and rules["unique"] and header in header_map:
                     col_index = header_map[header]
+                    # values = []  # 1. Create an empty bucket
+                    # for row in data_rows:
+                    #     # 2. Safety Check: Does this row actually have the column we want?
+                    #     # (e.g. if we want column 5, but the row only has 2 items, skip it)
+                    #     if col_index < len(row):
+                    #         # 3. Extract the specific cell value
+                    #         raw_value = row[col_index]
+                    #
+                    #         # 4. Clean it (remove whitespace)
+                    #         clean_value = raw_value.strip()
+                    #
+                    #         # 5. Add it to our bucket
+                    #         values.append(clean_value)
                     values = [
                         row[col_index].strip()
                         for row in data_rows
