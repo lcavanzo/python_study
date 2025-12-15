@@ -196,6 +196,46 @@ def validate_csv(filepath, expected_headers, validation_rules):
     return errors
 
 
+def report_errors(errors):
+    if not errors:
+        print("No validation errors found.")
+        return
+
+    print(f"\n--- Validation Summary: {len(errors)} Errors ---")
+    errors_by_type = {}
+    for error_msg in errors:
+        # Simple parsing to categorize errors
+        if "Header length mismatch" in error_msg:
+            error_type = "Header Structure Error"
+        elif "Header mismatch" in error_msg:
+            error_type = "Header Content Error"
+        elif "Column count mismatch" in error_msg:
+            error_type = "Row Structure Error"
+        elif "Required field is empty" in error_msg:
+            error_type = "Missing Required Field"
+        elif "Invalid type" in error_msg or "Expected type" in error_msg:
+            error_type = "Data Type Error"
+        elif "does not match regex" in error_msg:
+            error_type = "Regex Pattern Mismatch"
+        elif "below minimum" in error_msg or "above maximum" in error_msg:
+            error_type = "Value Range Error"
+        elif "not among allowed choices" in error_msg:
+            error_type = "Invalid Choice"
+        elif "Duplicate value" in error_msg:
+            error_type = "Duplicate Value Error"
+        elif "unknown header" in error_msg:
+            error_type = "Configuration Error"
+        else:
+            error_type = "General Error"
+
+        errors_by_type.setdefault(error_type, []).append(error_msg)
+
+    for error_type, msgs in errors_by_type.items():
+        print(f"\n{error_type} ({len(msgs)} instances):")
+        for msg in msgs:
+            print(f"  - {msg}")
+
+
 # Define expected headers and validation rules
 EXPECTED_HEADERS = ["ID", "Name", "Age", "Email", "Status"]
 VALIDATION_RULES = {
@@ -260,53 +300,54 @@ print("\n--- Validating 'complex_sample_data.csv' ---")
 validation_errors = validate_csv(
     "complex_sample_data.csv", EXPECTED_HEADERS, VALIDATION_RULES
 )
+report_errors(validation_errors)
 
-if validation_errors:
-    print(f"Validation completed with {len(validation_errors)} errors:")
-    for error in validation_errors:
-        print(f"- {error}")
-else:
-    print("CSV file is valid!")
-
-# Example with a valid file
-valid_data = [
-    ["ID", "Name", "Age", "Email", "Status"],
-    ["1", "Valid User One", "25", "user1@valid.com", "Active"],
-    ["2", "Valid User Two", "35", "user2@valid.com", "Inactive"],
-]
-with open("valid_data.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerows(valid_data)
-
-print("\n--- Validating 'valid_data.csv' ---")
-validation_errors_valid = validate_csv(
-    "valid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES
-)
-if validation_errors_valid:
-    print(f"Validation completed with {len(validation_errors_valid)} errors:")
-    for error in validation_errors_valid:
-        print(f"- {error}")
-else:
-    print("CSV file is valid!")
-
-# Example with incorrect headers
-incorrect_headers_data = [
-    ["User_ID", "Full_Name", "AGE", "Email_Address", "Status"],  # Incorrect headers
-    ["1", "Test User", "20", "test@example.com", "Active"],
-]
-with open("incorrect_headers.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerows(incorrect_headers_data)
-
-print("\n--- Validating 'incorrect_headers.csv' ---")
-validation_errors_incorrect_headers = validate_csv(
-    "incorrect_headers.csv", EXPECTED_HEADERS, VALIDATION_RULES
-)
-if validation_errors_incorrect_headers:
-    print(
-        f"Validation completed with {len(validation_errors_incorrect_headers)} errors:"
-    )
-    for error in validation_errors_incorrect_headers:
-        print(f"- {error}")
-else:
-    print("CSV file is valid!")
+# if validation_errors:
+#     print(f"Validation completed with {len(validation_errors)} errors:")
+#     for error in validation_errors:
+#         print(f"- {error}")
+# else:
+#     print("CSV file is valid!")
+#
+# # Example with a valid file
+# valid_data = [
+#     ["ID", "Name", "Age", "Email", "Status"],
+#     ["1", "Valid User One", "25", "user1@valid.com", "Active"],
+#     ["2", "Valid User Two", "35", "user2@valid.com", "Inactive"],
+# ]
+# with open("valid_data.csv", "w", newline="") as f:
+#     writer = csv.writer(f)
+#     writer.writerows(valid_data)
+#
+# print("\n--- Validating 'valid_data.csv' ---")
+# validation_errors_valid = validate_csv(
+#     "valid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES
+# )
+# if validation_errors_valid:
+#     print(f"Validation completed with {len(validation_errors_valid)} errors:")
+#     for error in validation_errors_valid:
+#         print(f"- {error}")
+# else:
+#     print("CSV file is valid!")
+#
+# # Example with incorrect headers
+# incorrect_headers_data = [
+#     ["User_ID", "Full_Name", "AGE", "Email_Address", "Status"],  # Incorrect headers
+#     ["1", "Test User", "20", "test@example.com", "Active"],
+# ]
+# with open("incorrect_headers.csv", "w", newline="") as f:
+#     writer = csv.writer(f)
+#     writer.writerows(incorrect_headers_data)
+#
+# print("\n--- Validating 'incorrect_headers.csv' ---")
+# validation_errors_incorrect_headers = validate_csv(
+#     "incorrect_headers.csv", EXPECTED_HEADERS, VALIDATION_RULES
+# )
+# if validation_errors_incorrect_headers:
+#     print(
+#         f"Validation completed with {len(validation_errors_incorrect_headers)} errors:"
+#     )
+#     for error in validation_errors_incorrect_headers:
+#         print(f"- {error}")
+# else:
+#     print("CSV file is valid!")
