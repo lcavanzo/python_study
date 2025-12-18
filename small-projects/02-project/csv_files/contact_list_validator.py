@@ -19,8 +19,32 @@ def validate_csv(filepath, expected_headers, validation_rules):
     try:
         with open(filepath, mode="r", newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            for v in reader:
-                print(v)
+            if not reader.fieldnames:
+                errors.append(f"Error: File empty: {filepath}")
+                return errors
+
+            if expected_headers != reader.fieldnames:
+                errors.append(
+                    f"Error: Headers Mistmatch: expected headers: {expected_headers}, received headers: {reader.fieldnames}"
+                )
+                return errors
+
+            row_number = 0
+            for row in reader:
+                row_number += 1
+                data_rows.append(row)
+                for key, validation_rule in validation_rules.items():
+                    row_value = row[key]
+
+                    # Validate required to True
+                    if validation_rule["required"] and not row_value:
+                        errors.append(
+                            f"Error Row {row_number}: Header '{key}' is required and must not be empty"
+                        )
+                        continue
+                    # Validate FirstName
+                    if key == "FirstName":
+                        print("firs naem")
 
     except FileNotFoundError:
         errors.append("File not Found")
