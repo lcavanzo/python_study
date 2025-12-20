@@ -69,13 +69,16 @@ def validate_csv(filepath, expected_headers, validation_rules):
                             continue
 
                     # Validate Phone
-                    if key == "Phone" and (not value or value):
-                        pattern = re.compile(validation_rule["regex"])
-                        match = pattern.search(value)
-                        if not match:
-                            errors.append(
-                                f"Error: Row {row_number}, Column '{key}', Phone '{value}' doesn't match the rules."
-                            )
+                    if key == "Phone":
+                        if value != "":
+                            pattern = re.compile(validation_rule["regex"])
+                            match = pattern.search(value)
+                            if not match:
+                                errors.append(
+                                    f"Error: Row {row_number}, Column '{key}', Phone '{value}' doesn't match the rules."
+                                )
+                        else:
+                            continue
 
                     # Validate email
                     if key == "Email" and (
