@@ -34,17 +34,70 @@ def validate_csv(filepath, expected_headers, validation_rules):
                 row_number += 1
                 data_rows.append(row)
                 for key, validation_rule in validation_rules.items():
-                    row_value = row[key]
+                    value = row[key]
 
                     # Validate required to True
-                    if validation_rule["required"] and not row_value:
+                    if validation_rule["required"] and not value:
                         errors.append(
-                            f"Error Row {row_number}: Header '{key}' is required and must not be empty"
+                            f"Error: Row {row_number}: Column '{key}' is required and must not be empty"
                         )
-                        continue
+
+                    # Validate type for each value
+                    try:
+                        expected_type = validation_rule["type"]
+                        if expected_type is int:
+                            int(value)
+                        elif expected_type is float:
+                            float(value)
+                        elif expected_type is bool:
+                            if value.lower() not in ["true", "false", "1", "0"]:
+                                errors.append(
+                                    f"Erro: Row {row_number}, Column '{key}': Invalid boolean value '{value}'."
+                                )
+
+                    except ValueError:
+                        errors.append(f"{value}")
+
                     # Validate FirstName
                     if key == "FirstName":
-                        print("firs naem")
+                        pattern = re.compile(validation_rule["regex"])
+                        match = pattern.search(value)
+                        if not match:
+                            errors.append(
+                                f"Error: Row {row_number}, Column '{key}', Name '{value}' doesn't match the rules."
+                            )
+                            continue
+
+                    # Validate Phone
+                    if key == "Phone" and (not value or value):
+                        pattern = re.compile(validation_rule["regex"])
+                        match = pattern.search(value)
+                        if not match:
+                            errors.append(
+                                f"Error: Row {row_number}, Column '{key}', Phone '{value}' doesn't match the rules."
+                            )
+
+                    # Validate email
+                    if key == "Email" and (
+                        validation_rule["required"] is True and value != ""
+                    ):
+                        pattern = re.compile(validation_rule["regex"])
+                        match = pattern.search(value)
+                        if not match:
+                            errors.append(
+                                f"Error: Row {row_number}, Column '{key}', Email '{value}' doesn't match the rules."
+                            )
+                            continue
+
+                    # Validate City
+                    if key == "City" and (
+                        validation_rule["required"] is True and value != ""
+                    ):
+                        if value.title() not in validation_rule["choices"]:
+                            errors.append(
+                                f"Error: Row {row_number}, Column '{key}', City '{value}' is not allowed."
+                            )
+                            continue
 
     except FileNotFoundError:
         errors.append("File not Found")
@@ -63,12 +116,12 @@ VALIDATION_RULES = {
     "Phone": {
         "required": False,
         "type": int,
-        "regex": r"r^\d{10}$",
+        "regex": r"^\d{10}$",
     },
     "Email": {
         "required": True,
         "type": str,
-        "regex": r"asd",
+        "regex": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
     },
     "City": {
         "required": True,
@@ -77,6 +130,7 @@ VALIDATION_RULES = {
             "New York",
             "London",
             "Paris",
+            "Mexico",
         ],
     },
 }
@@ -84,7 +138,7 @@ VALIDATION_RULES = {
 # --- Test Data Creation ---
 valid_data = [
     ["FirstName", "Phone", "Email", "City"],
-    ["Luis", "1234567890", "luis@shohoku.com", "London"],
+    ["Luis", "", "luis@shohoku.com", "Mexico"],
     ["Diana", "9876543210", "diana@ryonan.com", "Paris"],
 ]
 
