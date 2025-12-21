@@ -27,7 +27,6 @@ def validate_csv(filepath, expected_headers, validation_rules):
                 errors.append(
                     f"Error: Headers Mistmatch: expected headers: {expected_headers}, received headers: {reader.fieldnames}"
                 )
-                return errors
 
             row_number = 0
             for row in reader:
@@ -105,7 +104,6 @@ def validate_csv(filepath, expected_headers, validation_rules):
                                 f"Error: Row {row_number}, Column '{key}', City '{value}' is not allowed."
                             )
                             continue
-
     except FileNotFoundError:
         errors.append("File not Found")
 
@@ -156,6 +154,45 @@ with open("valid_data.csv", mode="w", newline="") as f:
 # Execution
 print("--- Starting Validation ---")
 errors = validate_csv("valid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES)
+
+if errors:
+    print("Errors Found:")
+    for e in errors:
+        print(f"- {e}")
+else:
+    print("Success! CSV is valid.")
+
+invalid_data = [
+    ["FirstName", "Phone", "Email", "City"],
+    ["Alice", "5512345678", "alice.smith@example.com", "New York"],
+    ["Bob", "4420794601", "bob.jones@testmail.co.uk", "London"],
+    ["Charlie", "3314567890", "charlie.brown@paris.fr", "Paris"],
+    ["David", "5255443322", "david.mx@company.mx", "Mexico"],
+    ["Eve", "1234567890", "eve.davis@web.net", "New York"],
+    ["Frank", "9876543210", "frank.white@biz.org", "London"],
+    # --- Edge Cases for Testing ---
+    ["Grace", "12345", "grace.short@example.com", "Paris"],  # Phone too short
+    ["Henry", "123456789012", "henry.long@example.com", "London"],  # Phone too long
+    ["Ivy", "abc1234567", "ivy.alpha@example.com", "Mexico"],  # Phone contains letters
+    ["Jack", "5512345678", "jack.purple@domain", "New York"],  # Invalid Email (no TLD)
+    [
+        "Karen",
+        "5598765432",
+        "karen.gold@example.com",
+        "Tokyo",
+    ],  # Invalid City (Not in allowed list)
+    ["Liam", "5511223344", "", "London"],  # Missing Email
+    ["Mike", "", "mike.missing@example.com", "Paris"],  # Missing Phone
+    ["", "5588776655", "nancy.noname@example.com", "Mexico"],  # Missing Name
+]
+
+with open("invalid_data.csv", mode="w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerows(invalid_data)
+
+# Execution
+print("--- Starting Validation(Invalid data) ---")
+errors = validate_csv("invalid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES)
 
 if errors:
     print("Errors Found:")
