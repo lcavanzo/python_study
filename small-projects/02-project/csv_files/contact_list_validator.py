@@ -43,20 +43,24 @@ def validate_csv(filepath, expected_headers, validation_rules):
                         )
 
                     # Validate type for each value
-                    try:
-                        expected_type = validation_rule["type"]
-                        if expected_type is int:
-                            int(value)
-                        elif expected_type is float:
-                            float(value)
-                        elif expected_type is bool:
-                            if value.lower() not in ["true", "false", "1", "0"]:
-                                errors.append(
-                                    f"Erro: Row {row_number}, Column '{key}': Invalid boolean value '{value}'."
-                                )
-
-                    except ValueError:
-                        errors.append(f"{value}")
+                    if validation_rule["required"] is False and not value:
+                        continue
+                    else:
+                        try:
+                            expected_type = validation_rule["type"]
+                            if expected_type is int:
+                                int(value)
+                            elif expected_type is float:
+                                float(value)
+                            elif expected_type is bool:
+                                if value.lower() not in ["true", "false", "1", "0"]:
+                                    errors.append(
+                                        f"Erro: Row {row_number}, Column '{key}': Invalid boolean value '{value}'."
+                                    )
+                        except ValueError:
+                            errors.append(
+                                f"Error: Row {row_number}, Column '{key}': Invalid value '{value}'"
+                            )
 
                     # Validate FirstName
                     if key == "FirstName":
@@ -141,7 +145,7 @@ VALIDATION_RULES = {
 # --- Test Data Creation ---
 valid_data = [
     ["FirstName", "Phone", "Email", "City"],
-    ["Luis", "", "luis@shohoku.com", "Mexico"],
+    ["Luis", "1234567890", "luis@shohoku.com", "Mexico"],
     ["Diana", "9876543210", "diana@ryonan.com", "Paris"],
 ]
 
