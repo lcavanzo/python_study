@@ -16,6 +16,16 @@ import re
 def validate_csv(filepath, expected_headers, validation_rules):
     errors = []
     data_rows = []
+    compiled_patterns = {}
+    cities = []
+
+    for key, rule in validation_rules.items():
+        if "regex" in rule:
+            compiled_patterns[key] = re.compile(rule["regex"])
+        elif "choices" in rule:
+            for city in rule["choices"]:
+                cities.append(city.lower())
+
     try:
         with open(filepath, mode="r", newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -23,7 +33,11 @@ def validate_csv(filepath, expected_headers, validation_rules):
                 errors.append(f"Error: File empty: {filepath}")
                 return errors
 
-            if expected_headers != reader.fieldnames:
+            if len(expected_headers) != len(reader.fieldnames):
+                errors.append(
+                    f"Error: Headers Length Mistmatch: expected headers: {len(expected_headers)}, received headers: {len(reader.fieldnames)}"
+                )
+            if set(expected_headers) != set(reader.fieldnames):
                 errors.append(
                     f"Error: Headers Mistmatch: expected headers: {expected_headers}, received headers: {reader.fieldnames}"
                 )
@@ -40,6 +54,7 @@ def validate_csv(filepath, expected_headers, validation_rules):
                         errors.append(
                             f"Error: Row {row_number}: Column '{key}' is required and must not be empty"
                         )
+                        continue
 
                     # Validate type for each value
                     if validation_rule["required"] is False and not value:
@@ -56,52 +71,27 @@ def validate_csv(filepath, expected_headers, validation_rules):
                                     errors.append(
                                         f"Erro: Row {row_number}, Column '{key}': Invalid boolean value '{value}'."
                                     )
+                                    continue
                         except ValueError:
                             errors.append(
                                 f"Error: Row {row_number}, Column '{key}': Invalid value '{value}'"
                             )
-
-                    # Validate FirstName
-                    if key == "FirstName":
-                        pattern = re.compile(validation_rule["regex"])
-                        match = pattern.search(value)
-                        if not match:
-                            errors.append(
-                                f"Error: Row {row_number}, Column '{key}', Name '{value}' doesn't match the rules."
-                            )
                             continue
 
-                    # Validate Phone
-                    if key == "Phone":
-                        if value != "":
-                            pattern = re.compile(validation_rule["regex"])
-                            match = pattern.search(value)
-                            if not match:
-                                errors.append(
-                                    f"Error: Row {row_number}, Column '{key}', Phone '{value}' doesn't match the rules."
-                                )
-                        else:
-                            continue
-
-                    # Validate email
-                    if key == "Email" and (
-                        validation_rule["required"] is True and value != ""
-                    ):
-                        pattern = re.compile(validation_rule["regex"])
-                        match = pattern.search(value)
-                        if not match:
+                    # Validate Rules
+                    if "regex" in validation_rule:
+                        pattern = compiled_patterns[key]
+                        if not pattern.search(value):
                             errors.append(
-                                f"Error: Row {row_number}, Column '{key}', Email '{value}' doesn't match the rules."
+                                f"Error: Row {row_number}, Column '{key}', value '{value}' doesn't match the rules."
                             )
                             continue
 
                     # Validate City
-                    if key == "City" and (
-                        validation_rule["required"] is True and value != ""
-                    ):
-                        if value.title() not in validation_rule["choices"]:
+                    if "choices" in validation_rule:
+                        if value.lower() not in set(cities):
                             errors.append(
-                                f"Error: Row {row_number}, Column '{key}', City '{value}' is not allowed."
+                                f"Error: Row {row_number}, Column '{key}', value '{value}' is not allowed."
                             )
                             continue
     except FileNotFoundError:
@@ -111,16 +101,21 @@ def validate_csv(filepath, expected_headers, validation_rules):
 
 
 # Configuration
-EXPECTED_HEADERS = ["FirstName", "Phone", "Email", "City"]
+EXPECTED_HEADERS = ["FirstName", "LastName", "Phone", "Email", "City"]
 VALIDATION_RULES = {
     "FirstName": {
         "required": True,
         "type": str,
         "regex": r"^[A-Za-z\s\-\']+$",
     },
+    "LastName": {
+        "required": True,
+        "type": str,
+        "regex": r"^[A-Za-z\s\-\']+$",
+    },
     "Phone": {
         "required": False,
-        "type": int,
+        "type": str,
         "regex": r"^\d{10}$",
     },
     "Email": {
@@ -142,9 +137,9 @@ VALIDATION_RULES = {
 
 # --- Test Data Creation ---
 valid_data = [
-    ["FirstName", "Phone", "Email", "City"],
-    ["Luis", "1234567890", "luis@shohoku.com", "Mexico"],
-    ["Diana", "9876543210", "diana@ryonan.com", "Paris"],
+    ["FirstName", "LastName", "Phone", "Email", "City"],
+    ["Luis", "Cavanzo", "1234567890", "luis@shohoku.com", "Mexico"],
+    ["Diana", "Caceres", "9876543210", "diana@ryonan.com", "Paris"],
 ]
 
 with open("valid_data.csv", mode="w", newline="") as f:
@@ -163,27 +158,46 @@ else:
     print("Success! CSV is valid.")
 
 invalid_data = [
-    ["FirstName", "Phone", "Email", "City"],
-    ["Alice", "5512345678", "alice.smith@example.com", "New York"],
-    ["Bob", "4420794601", "bob.jones@testmail.co.uk", "London"],
-    ["Charlie", "3314567890", "charlie.brown@paris.fr", "Paris"],
-    ["David", "5255443322", "david.mx@company.mx", "Mexico"],
-    ["Eve", "1234567890", "eve.davis@web.net", "New York"],
-    ["Frank", "9876543210", "frank.white@biz.org", "London"],
+    ["FirstName", "LastName", "Phone", "Email", "City"],
+    ["Alice", "Kennedy", "5512345678", "alice.smith@example.com", "New York"],
+    ["Bob", "Kahn", "4420794601", "bob.jones@testmail.co.uk", "London"],
+    ["Charlie", "Brown", "3314567890", "charlie.brown@paris.fr", "Paris"],
+    ["David", "Beckam", "5255443322", "david.mx@company.mx", "Mexico"],
+    ["Eve", "Patrice", "1234567890", "eve.davis@web.net", "New York"],
     # --- Edge Cases for Testing ---
-    ["Grace", "12345", "grace.short@example.com", "Paris"],  # Phone too short
-    ["Henry", "123456789012", "henry.long@example.com", "London"],  # Phone too long
-    ["Ivy", "abc1234567", "ivy.alpha@example.com", "Mexico"],  # Phone contains letters
-    ["Jack", "5512345678", "jack.purple@domain", "New York"],  # Invalid Email (no TLD)
+    ["Frank", "", "9876543210", "frank.white@biz.org", "London"],  # LastName missed
+    ["Grace", "Shelby", "12345", "grace.short@example.com", "Paris"],  # Phone too short
+    [
+        "Henry",
+        "Thierry",
+        "123456789012",
+        "henry.long@example.com",
+        "London",
+    ],  # Phone too long
+    [
+        "Ivy",
+        "Va",
+        "abc1234567",
+        "ivy.alpha@example.com",
+        "Mexico",
+    ],  # Phone contains letters
+    [
+        "Jack",
+        "Sparrow",
+        "5512345678",
+        "jack.purple@domain",
+        "New York",
+    ],  # Invalid Email (no TLD)
     [
         "Karen",
+        "Zinho",
         "5598765432",
         "karen.gold@example.com",
         "Tokyo",
     ],  # Invalid City (Not in allowed list)
-    ["Liam", "5511223344", "", "London"],  # Missing Email
-    ["Mike", "", "mike.missing@example.com", "Paris"],  # Missing Phone
-    ["", "5588776655", "nancy.noname@example.com", "Mexico"],  # Missing Name
+    ["Liam", "Thuram", "5511223344", "", "London"],  # Missing Email
+    ["Mike", "Mike", "", "mike.missing@example.com", "Paris"],  # Missing Phone
+    ["", "Mo", "5588776655", "nancy.noname@example.com", "Mexico"],  # Missing Name
 ]
 
 with open("invalid_data.csv", mode="w", newline="") as f:
