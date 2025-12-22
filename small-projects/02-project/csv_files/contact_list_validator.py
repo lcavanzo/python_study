@@ -15,7 +15,6 @@ import re
 
 def validate_csv(filepath, expected_headers, validation_rules):
     errors = []
-    data_rows = []
     compiled_patterns = {}
     cities = []
 
@@ -45,7 +44,6 @@ def validate_csv(filepath, expected_headers, validation_rules):
             row_number = 0
             for row in reader:
                 row_number += 1
-                data_rows.append(row)
                 for key, validation_rule in validation_rules.items():
                     value = row[key]
 
