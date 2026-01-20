@@ -42,6 +42,16 @@ def validate_inventory(filepath, expected_headers, validation_rules):
                 )
                 return errors
             row_number = 1
+
+            # Handling Unique Values
+            ## Example: unique_values= storage = { "ProductID": {1, 2, 3}, "AnotherUniqueCol": {"a", "b"} }
+            unique_values_tracker = {}
+
+            # Prefill keys for columns that require uniqueness
+            for k, v in validation_rules.items():
+                if v.get("unique"):
+                    unique_values_tracker[k] = set()
+
             for row in reader:
                 data_rows.append(row)
                 row_number += 1
@@ -102,18 +112,17 @@ def validate_inventory(filepath, expected_headers, validation_rules):
                                 f"Error Row {row_number}: Column {key}, Invalid value '{row_value}', Maximum '{validation_rule['max']}'"
                             )
                         continue
+                    
 
-                    # TODO: validate unique value
-                    seen = []
-                    duplicate = []
+                    print(unique_values_tracker)
                     if "unique" in validation_rule:
-                        for checked_row in data_rows:
-                            if row_value in checked_row and row_value not in duplicate:
-                                errors.append(
-                                    f"Error Row {row_number}: Column '{key}', value '{row_value}' duplicated"
-                                )
-                            duplicate.append(row[key])
-                        seen.append(row[key])
+                        # check if the value is already in the set for this column
+                        if row_value in unique_values_tracker[key]:
+                            errors.append(
+                                f"Error Row {row_number}: Column '{key}', value '{row_value}' duplicated"
+                            )
+                        else:
+                            unique_values_tracker[key].add(row_value)
 
     except FileNotFoundError:
         errors.append(f"Error: File '{filepath}' not found")
@@ -169,9 +178,9 @@ else:
 invalid_data = [
     ["ProductID", "ProductName", "Quantity", "Price", "Category"],
     ["1", "Laptop", 10, 1200.50, "Electronics"],
+    ["1", "Keyboard", 15, 75.20, "Electronics"],  # Duplicate ProductID
     ["2", "Python Book", 50, 35.75, "Books"],
     ["", "Monitor", 20, 300.00, "Electronics"],  # Missing ProductID (required)
-    [1, "Keyboard", 15, 75.20, "Electronics"],  # Duplicate ProductID
     ["ABC", "Mouse", 30, 25.50, "Electronics"],  # Invalid ProductID type (not int)
     [0, "Webcam", 5, 40.00, "Electronics"],  # ProductID below min (min: 1)
     [5, "", 5, 50.00, "Books"],  # Missing ProductName (required)
@@ -202,11 +211,11 @@ try:
 except Exception as e:
     print(f"Error: {e}")
 
-# print("--- Starting Validation(invalida data) ---")
-# errors = validate_inventory("invalid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES)
-# if errors:
-#     print("Errors Found:")
-#     for e in errors:
-#         print(f"- {e}")
-# else:
-#     print("Success! CSV is valid.")
+print("--- Starting Validation(invalida data) ---")
+errors = validate_inventory("invalid_data.csv", EXPECTED_HEADERS, VALIDATION_RULES)
+if errors:
+    print("Errors Found:")
+    for e in errors:
+        print(f"- {e}")
+else:
+    print("Success! CSV is valid.")
