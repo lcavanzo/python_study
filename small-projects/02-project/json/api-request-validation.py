@@ -1,6 +1,3 @@
-import json
-from re import T
-from typing import Required
 from jsonschema import validate, ValidationError, Draft7Validator
 
 
@@ -8,31 +5,31 @@ from jsonschema import validate, ValidationError, Draft7Validator
 product_create_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Product Creation Request",
-    "description": "Schema for validating product creationn API requests.",
+    "description": "Schema for validating product creation API requests.",
     "type": "object",
     "properties": {
-        "name:": {
+        "name": {
             "type": "string",
-            "description": "Name of the product",
-            "minLenght": 3,
+            "description": "Name of the product.",
+            "minLength": 3,
         },
         "description": {
             "type": "string",
-            "description": "Detailed description of the product",
+            "description": "Detailed description of the product.",
         },
         "price": {
             "type": "number",
-            "description": "Price of the product",
+            "description": "Price of the product.",
             "exclusiveMinimum": 0,
         },
         "category": {
             "type": "string",
-            "description": "category the product belogs to",
+            "description": "Category the product belongs to.",
             "enum": ["Electronics", "Books", "Apparel", "Home Goods"],
         },
         "tags": {
             "type": "array",
-            "description": "List of releveant tags for the product",
+            "description": "List of relevant tags for the product.",
             "items": {"type": "string"},
             "uniqueItems": True,
         },
@@ -40,7 +37,7 @@ product_create_schema = {
     "required": ["name", "price", "category"],
 }
 
-# Simulate an API reqeuest body (valid)
+# Simulate an API request body (valid)
 valid_request_body = {
     "name": "Wireless Headphones",
     "description": "High-quality wireless headphones with noise cancellation",
@@ -72,9 +69,9 @@ def validate_product_request(request_data):
             print(f"\nValidation failed for request: {request_data}")
             for error in errors:
                 print(f"- {error.message} (Path: {list(error.path)})")
-            else:
-                print(f"\nValidation Successful for request: {request_data['name']}")
-                return True
+        else:
+            print(f"\nValidation Successful for request: {request_data['name']}")
+            return True
     except Exception as e:
         print(f"\nAn unexpected error occured during validation: {e}")
         return False
