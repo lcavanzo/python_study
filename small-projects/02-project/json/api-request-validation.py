@@ -69,6 +69,7 @@ def validate_product_request(request_data):
             print(f"\nValidation failed for request: {request_data}")
             for error in errors:
                 print(f"- {error.message} (Path: {list(error.path)})")
+            return False
         else:
             print(f"\nValidation Successful for request: {request_data['name']}")
             return True
