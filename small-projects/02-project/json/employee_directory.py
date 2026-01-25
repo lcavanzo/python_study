@@ -30,15 +30,15 @@ employee_schema = {
             "description": "Unique identifier for an employee",
             "minimum": 1,
         },
-        "fistName": {
+        "firstName": {
             "type": "string",
             "description": "Employe's first name",
-            "minLenght": 2,
+            "minLength": 2,
         },
         "lastName": {
             "type": "string",
             "description": "Employee's last name",
-            "minLenght": 2,
+            "minLength": 2,
         },
         "email": {
             "type": "string",
@@ -62,8 +62,9 @@ employee_schema = {
     },
     "required": [
         "id",
-        "fistName",
+        "firstName",
         "lastName",
+        "email",
         "department",
         "startDate",
         "isActive",
@@ -73,7 +74,7 @@ employee_schema = {
 employees = {
     "emp1": {
         "id": 123,
-        "fistName": "Luis",
+        "firstName": "Luis",
         "lastName": "Cavanzo",
         "email": "emp1@example.com",
         "department": "Engineering",
@@ -82,7 +83,7 @@ employees = {
     },
     "emp2": {
         "id": 456,
-        "fistName": "Diana",
+        "firstName": "Diana",
         # "lastName": "Caceres", # Missing last name
         "email": "emp2@example.com",
         "department": "Sales",
@@ -91,7 +92,7 @@ employees = {
     },
     "emp3": {
         "id": 890,
-        "fistName": "Toji",
+        "firstName": "Toji",
         "lastName": "Zannin",
         "email": "emp3example.com",  # wrong email
         "department": "outside",
@@ -100,7 +101,7 @@ employees = {
     },
     "emp4": {
         "id": "aaa",
-        "fistName": 1243,
+        "firstName": 1243,
         "lastName": 345,
         # "email": "emp1@example.com",
         # "department": "Engineering",
@@ -110,30 +111,41 @@ employees = {
 }
 
 
-def validate_employees_data(employee_info):
+VALIDATOR = Draft7Validator(
+    schema=employee_schema, format_checker=Draft7Validator.FORMAT_CHECKER
+)
+
+
+def validate_employees_data(employee_info, validator):
     """
-    Validates an incoming employee information against the schema
+    Validates an incoming employee information against the schema.
 
     Returns:
-        True if valid, print errors and returns False otherwise
+        list: A list of error strings. Returns empty list [] if valid.
     """
+    found_errors = []
     try:
-        validator = Draft7Validator(schema=employee_schema)
         errors = sorted(validator.iter_errors(employee_info), key=str)
         if errors:
             for error in errors:
-                print(f"- Error {error.message}")
-            return False
-        else:
-            return True
-    except ValidationError as e:
-        print(e.message)
-        return False
+                message = f"Error in field {list(error.path)}: {error.message}"
+                found_errors.append(message)
+    except Exception as e:
+        found_errors.append(f"Critical Error: {str(e)}")
+    return found_errors
 
 
 for employee in employees.values():
-    print("--- Validating Employee Information ---")
-    if validate_employees_data(employee):
-        print(f"Validation Successful for employee: {employee['id']}\n")
+    print(f"--- Processing Employee {employee['id']} ---")
+
+    validation_results = validate_employees_data(employee, VALIDATOR)
+
+    # Check the size of the list to decide Success vs Failure
+    if len(validation_results) == 0:
+        print("Status: Valid")
     else:
-        print(f"Validation Failed for employee: {employee['id']}\n")
+        print("Status: Invalid")
+        print("Details:")
+        for msg in validation_results:
+            print(f" - {msg}")
+    print("\n")  # formatting line break
