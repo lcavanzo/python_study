@@ -17,7 +17,7 @@ Build a small system to manage employee data.
 """
 
 import json
-from jsonschema import validate, ValidationError, Draft7Validator
+from jsonschema import ValidationError, Draft7Validator
 
 employee_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -64,7 +64,6 @@ employee_schema = {
         "id",
         "fistName",
         "lastName",
-        "required",
         "department",
         "startDate",
         "isActive",
@@ -73,7 +72,7 @@ employee_schema = {
 
 employees = {
     "emp1": {
-        "id": "123",
+        "id": 123,
         "fistName": "Luis",
         "lastName": "Cavanzo",
         "email": "emp1@example.com",
@@ -82,7 +81,7 @@ employees = {
         "isActive": True,
     },
     "emp2": {
-        "id": "456",
+        "id": 456,
         "fistName": "Diana",
         # "lastName": "Caceres", # Missing last name
         "email": "emp2@example.com",
@@ -91,7 +90,7 @@ employees = {
         "isActive": False,
     },
     "emp3": {
-        "id": "890",
+        "id": 890,
         "fistName": "Toji",
         "lastName": "Zannin",
         "email": "emp3example.com",  # wrong email
@@ -100,7 +99,7 @@ employees = {
         "isActive": False,
     },
     "emp4": {
-        "id": "0",
+        "id": "aaa",
         "fistName": 1243,
         "lastName": 345,
         # "email": "emp1@example.com",
@@ -118,5 +117,23 @@ def validate_employees_data(employee_info):
     Returns:
         True if valid, print errors and returns False otherwise
     """
+    try:
+        validator = Draft7Validator(schema=employee_schema)
+        errors = sorted(validator.iter_errors(employee_info), key=str)
+        if errors:
+            for error in errors:
+                print(f"- Error {error.message}")
+            return False
+        else:
+            return True
+    except ValidationError as e:
+        print(e.message)
+        return False
 
-    pass
+
+for employee in employees.values():
+    print("--- Validating Employee Information ---")
+    if validate_employees_data(employee):
+        print(f"Validation Successful for employee: {employee['id']}\n")
+    else:
+        print(f"Validation Failed for employee: {employee['id']}\n")
