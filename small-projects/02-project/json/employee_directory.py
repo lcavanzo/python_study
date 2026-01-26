@@ -16,8 +16,7 @@ Build a small system to manage employee data.
 
 """
 
-import json
-from jsonschema import ValidationError, Draft7Validator
+from jsonschema import Draft7Validator
 
 employee_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
