@@ -41,7 +41,7 @@ if __name__ == "__main__":
             parsed_logs.append(parsed_data)
             print(f"Parsed: {parsed_data}")
         else:
-            print(f"Skipped malformed line: {log_entry}")
+            print(f"WARNING: Malformed log line skipped: '{log_entry}'")
 
     # we have structured data in parsed_logs
     print("\nCollected parsed logs:")

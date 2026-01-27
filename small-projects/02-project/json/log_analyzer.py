@@ -11,13 +11,15 @@ def read_log_file(filepath):
             for line in f:
                 yield line.strip()  # .strip() removes leading/trailing whitespaces, including  newline
     except FileNotFoundError:
+        # Crucial for use experience and preventing crashes
         print(f"Error: The file '{filepath}' was not found.")
-        # In a real application, you might raise a custom exception or log for this.
         return  # Strop execution if file not found
     except PermissionError:
+        # Important for security and system integrity
         print(f"Error: Permission denied to access '{filepath}'.")
         return
     except IOError as e:
+        # Catch--- for other I/o related issues
         print(f"Error reading file '{filepath}': {e}")
         return
 
