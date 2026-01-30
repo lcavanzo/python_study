@@ -1,6 +1,6 @@
 # log_analyzer.py
 import re
-from collections import counter
+from collections import Counter
 from sys import dont_write_bytecode
 
 # Regex pattern for a generic log line: [TIMESTAMP] LEVEL: MESSAGE
@@ -66,7 +66,7 @@ def analyze_logs(filepath):
             log_entries.append(parsed_data)
         else:
             skipped_lines_count += 1
-            # Optional: print(f"WARNING: Skipping malformed line: {line}")
+            # Optional: print(f"WARNING -: Skipping malformed line: {line}")
 
     # Performs some basic analysis
     level_counts = Counter(entry["level"] for entry in log_entries)
@@ -94,3 +94,13 @@ if __name__ == "__main__":
     """
     with open("app.log", "w", encoding="utf-8") as f:
         f.write(dummy_log_content.strip())
+
+    print("--- Log File Analizer ---")
+    results = analyze_logs("app.log")
+
+    if results:
+        print("\nAnalysis Results:")
+        for key, value in results.items():
+            print(f"- {key.replace('_', ' ').title()}: {value}")
+    else:
+        print("No analysis results were generated, possibly due to file access issues.")
