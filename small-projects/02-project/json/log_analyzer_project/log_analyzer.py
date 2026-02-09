@@ -1,10 +1,7 @@
 # log_analyzer.py
 import re
 from collections import Counter
-from sys import dont_write_bytecode
-
-# Regex pattern for a generic log line: [TIMESTAMP] LEVEL: MESSAGE
-# you might need to adjust this based on the specific log format you choose
+import sys
 
 LOG_PATTERN = re.compile(
     r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s*(INFO|WARNING|ERROR|DEBUG|CRITICAL):\s*(.*?)(?:\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?\.?$"
@@ -72,7 +69,7 @@ def analyze_logs(filepath):
     level_counts = Counter(entry["level"] for entry in log_entries)
     message_counts = Counter(entry["message"] for entry in log_entries)
     ip_counts = Counter(entry["ip"] for entry in log_entries)
-    ip_counts.pop(None)
+    # ip_counts.pop(None)
 
     analysis_results = {
         "total_lines_read": len(log_entries) + skipped_lines_count,
@@ -88,8 +85,23 @@ def analyze_logs(filepath):
 
 
 if __name__ == "__main__":
-    # Create a dummy log file for demosntration
-    dummy_log_content = """
+    if len(sys.argv) > 1:
+        filepath = sys.argv[1]
+        print("--- Log File Analizer(reading from system) ---")
+        results = analyze_logs(filepath)
+
+        if results:
+            print("\nAnalysis Results:")
+            for key, value in results.items():
+                print(f"- {key.replace('_', ' ').title()}: {value}")
+        else:
+            print(
+                "No analysis results were generated, possibly due to file access issues."
+            )
+    else:
+        print("No Argument passess, creating a dummy file to show the example...")
+        # Create a dummy log file for demosntration
+        dummy_log_content = """
         [2023-10-26 10:30:20] INFO: Database running
         [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.10.
         [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.10.
@@ -107,16 +119,18 @@ if __name__ == "__main__":
         [2023-10-26 10:34:20] ERROR: Database down
         [2023-10-26 10:35:00] ERROR: Database down
         [2023-10-26 10:36:20] INFO: Database running
-    """
-    with open("app.log", "w", encoding="utf-8") as f:
-        f.write(dummy_log_content.strip())
+        """
+        with open("app.log", "w", encoding="utf-8") as f:
+            f.write(dummy_log_content.strip())
 
-    print("--- Log File Analizer ---")
-    results = analyze_logs("app.log")
+        print("--- Log File Analizer ---")
+        results = analyze_logs("app.log")
 
-    if results:
-        print("\nAnalysis Results:")
-        for key, value in results.items():
-            print(f"- {key.replace('_', ' ').title()}: {value}")
-    else:
-        print("No analysis results were generated, possibly due to file access issues.")
+        if results:
+            print("\nAnalysis Results:")
+            for key, value in results.items():
+                print(f"- {key.replace('_', ' ').title()}: {value}")
+        else:
+            print(
+                "No analysis results were generated, possibly due to file access issues."
+            )
