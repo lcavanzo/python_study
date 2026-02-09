@@ -7,7 +7,7 @@ from sys import dont_write_bytecode
 # you might need to adjust this based on the specific log format you choose
 
 LOG_PATTERN = re.compile(
-    r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s*(INFO|WARNING|ERROR|DEBUG|CRITICAL):\s*(.*)$"
+    r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s*(INFO|WARNING|ERROR|DEBUG|CRITICAL):\s*(.*?)(?:\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?\.?$"
 )
 
 
@@ -44,8 +44,8 @@ def parse_log_line(line):
     """
     match = LOG_PATTERN.match(line)
     if match:
-        timestamp, level, message = match.groups()
-        return {"timestamp": timestamp, "level": level, "message": message}
+        timestamp, level, message, ip = match.groups()
+        return {"timestamp": timestamp, "level": level, "message": message, "ip": ip}
     return None
 
 
@@ -70,6 +70,9 @@ def analyze_logs(filepath):
 
     # Performs some basic analysis
     level_counts = Counter(entry["level"] for entry in log_entries)
+    message_counts = Counter(entry["message"] for entry in log_entries)
+    ip_counts = Counter(entry["ip"] for entry in log_entries)
+    ip_counts.pop(None)
 
     analysis_results = {
         "total_lines_read": len(log_entries) + skipped_lines_count,
@@ -78,6 +81,8 @@ def analyze_logs(filepath):
         "log_level_counts": dict(
             level_counts
         ),  # Convert Counter to dict for easier display/storage
+        "message_level_counts": dict(message_counts),
+        "ip_addresses": dict(ip_counts),
     }
     return analysis_results
 
@@ -85,12 +90,23 @@ def analyze_logs(filepath):
 if __name__ == "__main__":
     # Create a dummy log file for demosntration
     dummy_log_content = """
+        [2023-10-26 10:30:20] INFO: Database running
         [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.10.
+        [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.10.
+        [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.20.
+        [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.20.
+        [2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.20.
         [2023-10-26 10:31:02] WARNING: Disk space low on /var/log. Current usage: 90%.
-        [2023-10-26 10:31:15] ERROR: Failed to connect to database at db.example.com. Connection refused. This is a malformed line.
+        [2023-10-26 10:31:15] ERROR: Failed to connect to database at db.example.com. Connection refused.
+        This is a malformed line.
         [2023-10-26 10:32:01] INFO: Application started successfully.
         [2023-10-26 10:32:30] DEBUG: Processing request for user_id=123.
         [2023-10-26 10:33:00] ERROR: Another critical error occurred.
+        [2023-10-26 10:34:15] ERROR: Failed to connect to database at db.example.com. Connection refused.
+        This is a malformed line.
+        [2023-10-26 10:34:20] ERROR: Database down
+        [2023-10-26 10:35:00] ERROR: Database down
+        [2023-10-26 10:36:20] INFO: Database running
     """
     with open("app.log", "w", encoding="utf-8") as f:
         f.write(dummy_log_content.strip())
