@@ -80,6 +80,23 @@ def test_parse_log_line_empty_returns_none():
     assert parse_log_line("") is None
 
 
+# TODO:
+# def test_parse_log_line_specific_error_types_successful():
+#     pass
+#
+#
+# def test_parse_log_line_specific_error_types_empty():
+#     pass
+#
+#
+# def test_parse_log_line_specific_error_types_none():
+#     pass
+#
+#
+# def test_parse_log_line_specific_error_types_count_0():
+#     pass
+
+
 # --- Test for analyze_logs ---
 def test_analyze_logs_basic_funcionality():
     """
