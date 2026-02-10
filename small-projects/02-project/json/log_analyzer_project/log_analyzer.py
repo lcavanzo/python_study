@@ -46,6 +46,18 @@ def parse_log_line(line):
     return None
 
 
+def filter_logs_by_level(parsed_logs, min_level):
+    """
+    Reads parsed logs and a minimim log level:
+    Args:
+        parsed_logs(dic): parsed logs
+        min_level: one of DEBUG < INFO < WARNING < ERROR < CRITICAL
+    Returns
+        new list containing only the logs at or above that severity
+    """
+    log_levels = {"DEBUG": 0, "INFO": 1, "WARNING": 2, "ERROR": 3, "CRITICAL": 4}
+
+
 def analyze_logs(filepath):
     """
     Reads, parses, and performs basic analysis on log entries from a file.
@@ -69,7 +81,6 @@ def analyze_logs(filepath):
     level_counts = Counter(entry["level"] for entry in log_entries)
     message_counts = Counter(entry["message"] for entry in log_entries)
     ip_counts = Counter(entry["ip"] for entry in log_entries)
-    print(ip_counts)
     if ip_counts[None]:
         del ip_counts[None]
 
