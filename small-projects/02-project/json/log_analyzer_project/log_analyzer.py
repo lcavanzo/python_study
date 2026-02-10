@@ -4,7 +4,7 @@ from collections import Counter
 import sys
 
 LOG_PATTERN = re.compile(
-    r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s*(INFO|WARNING|ERROR|DEBUG|CRITICAL):\s*(.*?)(?:\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?\.?$"
+    r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s*(INFO|WARNING|ERROR|DEBUG|CRITICAL):\s*(.*?)(?:\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?\.*?$"
 )
 
 
@@ -69,7 +69,9 @@ def analyze_logs(filepath):
     level_counts = Counter(entry["level"] for entry in log_entries)
     message_counts = Counter(entry["message"] for entry in log_entries)
     ip_counts = Counter(entry["ip"] for entry in log_entries)
-    # ip_counts.pop(None)
+    print(ip_counts)
+    if ip_counts[None]:
+        del ip_counts[None]
 
     analysis_results = {
         "total_lines_read": len(log_entries) + skipped_lines_count,

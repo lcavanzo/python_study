@@ -42,11 +42,14 @@ def test_parse_log_line_valid_info():
     """
     Tests parsing a standard INFO log line
     """
-    line = "[2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard."
+    line = (
+        "[2023-10-26 10:30:45] INFO: User 'admin' accessed /dashboard from 192.168.1.10"
+    )
     expected = {
         "timestamp": "2023-10-26 10:30:45",
         "level": "INFO",
-        "message": "User 'admin' accessed /dashboard.",
+        "message": "User 'admin' accessed /dashboard from",
+        "ip": "192.168.1.10",
     }
     assert parse_log_line(line) == expected
 
@@ -55,11 +58,12 @@ def test_parse_log_line_valid_warning_with_spaces():
     """
     Tests parsing a WARNING log line with extra spaces
     """
-    line = "[2023-10-26 10:31:02]  WARNING:   Disk space low."
+    line = "[2023-10-26 10:31:02]  WARNING:   Disk space low"
     expected = {
         "timestamp": "2023-10-26 10:31:02",
         "level": "WARNING",
-        "message": "Disk space low.",
+        "message": "Disk space low",
+        "ip": None,
     }
     assert parse_log_line(line) == expected
 
@@ -111,6 +115,13 @@ def test_analyze_logs_basic_funcionality():
             "total_parsed_lines": 4,
             "skipped_lines": 1,
             "log_level_counts": {"INFO": 2, "ERROR": 1, "WARNING": 1},
+            "message_level_counts": {
+                "Log entry 1": 1,
+                "Log entry 2": 1,
+                "Log entry 3": 1,
+                "Log entry 4": 1,
+            },
+            "ip_addresses": {},
         }
         assert results == expected_results
 
@@ -124,6 +135,8 @@ def test_analyze_logs_empty_file():
             "total_parsed_lines": 0,
             "skipped_lines": 0,
             "log_level_counts": {},
+            "message_level_counts": {},
+            "ip_addresses": {},
         }
         assert results == expected_results
 
@@ -140,5 +153,7 @@ def test_analyze_logs_file_not_found():
                 "total_parsed_lines": 0,
                 "skipped_lines": 0,
                 "log_level_counts": {},
+                "message_level_counts": {},
+                "ip_addresses": {},
             }
         )
