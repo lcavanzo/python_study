@@ -56,6 +56,11 @@ def filter_logs_by_level(parsed_logs, min_level):
         new list containing only the logs at or above that severity
     """
     log_levels = {"DEBUG": 0, "INFO": 1, "WARNING": 2, "ERROR": 3, "CRITICAL": 4}
+    log_entries = []
+    for line in parsed_logs:
+        if log_levels[line["level"]] >= log_levels[min_level]:
+            log_entries.append(line)
+    return log_entries
 
 
 def analyze_logs(filepath):
@@ -67,6 +72,7 @@ def analyze_logs(filepath):
         dic: A dictionary containing analysis results(e.g., log level counts)
     """
     log_entries = []
+    log_entries_sanitized = []
     skipped_lines_count = 0
 
     for line in read_log_file(filepath):
@@ -76,6 +82,8 @@ def analyze_logs(filepath):
         else:
             skipped_lines_count += 1
             # Optional: print(f"WARNING -: Skipping malformed line: {line}")
+
+    log_entries_sanitized = filter_logs_by_level(log_entries, "WARNING")
 
     # Performs some basic analysis
     level_counts = Counter(entry["level"] for entry in log_entries)
@@ -94,6 +102,7 @@ def analyze_logs(filepath):
         "message_level_counts": dict(message_counts),
         "ip_addresses": dict(ip_counts),
     }
+
     return analysis_results
 
 
@@ -139,11 +148,11 @@ if __name__ == "__main__":
         print("--- Log File Analizer ---")
         results = analyze_logs("app.log")
 
-        if results:
-            print("\nAnalysis Results:")
-            for key, value in results.items():
-                print(f"- {key.replace('_', ' ').title()}: {value}")
-        else:
-            print(
-                "No analysis results were generated, possibly due to file access issues."
-            )
+        # if results:
+        #     print("\nAnalysis Results:")
+        #     for key, value in results.items():
+        #         print(f"- {key.replace('_', ' ').title()}: {value}")
+        # else:
+        #     print(
+        #         "No analysis results were generated, possibly due to file access issues."
+        #     )
