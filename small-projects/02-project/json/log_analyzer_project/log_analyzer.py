@@ -74,6 +74,7 @@ def analyze_logs(filepath):
     log_entries = []
     log_entries_sanitized = []
     skipped_lines_count = 0
+    error_level = "WARNING"
 
     for line in read_log_file(filepath):
         parsed_data = parse_log_line(line)
@@ -83,7 +84,7 @@ def analyze_logs(filepath):
             skipped_lines_count += 1
             # Optional: print(f"WARNING -: Skipping malformed line: {line}")
 
-    log_entries_sanitized = filter_logs_by_level(log_entries, "WARNING")
+    log_entries_sanitized = filter_logs_by_level(log_entries, error_level)
 
     # Performs some basic analysis
     level_counts = Counter(entry["level"] for entry in log_entries)
@@ -91,6 +92,10 @@ def analyze_logs(filepath):
     ip_counts = Counter(entry["ip"] for entry in log_entries)
     if ip_counts[None]:
         del ip_counts[None]
+
+    errors = []
+    for entry in log_entries_sanitized:
+        errors.append([entry["level"], entry["message"]])
 
     analysis_results = {
         "total_lines_read": len(log_entries) + skipped_lines_count,
@@ -101,6 +106,7 @@ def analyze_logs(filepath):
         ),  # Convert Counter to dict for easier display/storage
         "message_level_counts": dict(message_counts),
         "ip_addresses": dict(ip_counts),
+        "level_errors": errors,
     }
 
     return analysis_results
@@ -115,7 +121,10 @@ if __name__ == "__main__":
         if results:
             print("\nAnalysis Results:")
             for key, value in results.items():
-                print(f"- {key.replace('_', ' ').title()}: {value}")
+                if key != "level_errors":
+                    print(f"- {key.replace('_', ' ').title()}: {value}")
+                else:
+                    print("hi")
         else:
             print(
                 "No analysis results were generated, possibly due to file access issues."
@@ -148,11 +157,17 @@ if __name__ == "__main__":
         print("--- Log File Analizer ---")
         results = analyze_logs("app.log")
 
-        # if results:
-        #     print("\nAnalysis Results:")
-        #     for key, value in results.items():
-        #         print(f"- {key.replace('_', ' ').title()}: {value}")
-        # else:
-        #     print(
-        #         "No analysis results were generated, possibly due to file access issues."
-        #     )
+        if results:
+            print("\nAnalysis Results:")
+            for key, value in results.items():
+                if key != "level_errors":
+                    print(f"- {key.replace('_', ' ').title()}: {value}")
+                else:
+                    print("---ERRORS/WARNINGS---")
+                    for level, msg in value:
+                        print(f"{level}: {msg}")
+
+        else:
+            print(
+                "No analysis results were generated, possibly due to file access issues."
+            )
