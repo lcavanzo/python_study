@@ -63,7 +63,7 @@ def filter_logs_by_level(parsed_logs, min_level):
     return log_entries
 
 
-def analyze_logs(filepath):
+def analyze_logs(filepath, errors_level="INFO"):
     """
     Reads, parses, and performs basic analysis on log entries from a file.
     Args:
@@ -74,7 +74,7 @@ def analyze_logs(filepath):
     log_entries = []
     log_entries_sanitized = []
     skipped_lines_count = 0
-    error_level = "WARNING"
+    error_level = errors_level
 
     for line in read_log_file(filepath):
         parsed_data = parse_log_line(line)
@@ -106,7 +106,7 @@ def analyze_logs(filepath):
         ),  # Convert Counter to dict for easier display/storage
         "message_level_counts": dict(message_counts),
         "ip_addresses": dict(ip_counts),
-        "level_errors": errors,
+        # "level_errors": errors,
     }
 
     return analysis_results
