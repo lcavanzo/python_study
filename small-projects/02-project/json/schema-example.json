@@ -1,0 +1,58 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "User Profile",
+    "description": "Schema for validating a user profile object.",
+    "type": "object",
+    "properties": {
+        "userId": {
+            "type": "integer",
+            "description": "Unique identifier for the user.",
+            "minimum": 1
+        },
+        "username": {
+            "type": "string",
+            "description": "User's unique username.",
+            "minLength": 3,
+            "maxLength": 20
+        },
+        "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address."
+        },
+        "isActive": {
+            "type": "boolean",
+            "description": "Indicates if the user account is active."
+        },
+        "roles": {
+            "type": "array",
+            "description": "List of roles assigned to the user.",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "admin",
+                    "editor",
+                    "user",
+                    "guest"
+                ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "lastLogin": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp of the user's last login."
+        }
+    },
+    "required": [
+        "userId",
+        "username",
+        "email",
+        "isActive",
+        "roles"
+    ]
+}
