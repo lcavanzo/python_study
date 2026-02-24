@@ -27,7 +27,9 @@ Objective: Create a class hierarchy for geometric shapes and test their area cal
         Test the get_description() method for each shape type.
 """
 
+from abc import ABC, abstractmethod
 import math
+import unittest
 
 
 class Shape:
@@ -38,7 +40,7 @@ class Shape:
         """Mandatory method for all the shapes"""
         raise NotImplementedError
 
-    def get_description(self):
+    def get_description(self) -> str:
         """
         Return Shape description
         """
@@ -46,15 +48,126 @@ class Shape:
 
 
 class Circle(Shape):
+    """
+    Class that represents a Circle
+    """
+
     def __init__(self, name, radius):
+        """
+        Initialize Circle class
+        """
+
         super().__init__(name)
         self.radius = radius
 
     def area(self):
+        """
+        Overriding Area method for a circle shape
+        """
+
         return math.pi * (self.radius**2)
 
-    def get_description(self):
+    def get_description(self) -> str:
         """
         Shows Circle description
         """
         return f"This is Circle with radius {self.radius}."
+
+
+class Rectangle(Shape):
+    """
+    Class that represents a Rectangle
+    """
+
+    def __init__(self, name, width, height):
+        """
+        Initialize Rectangle class
+        """
+
+        super().__init__(name)
+        self.width = width
+        self.height = height
+
+    def area(self):
+        """
+        Overriding Area method for a rectangle shape
+        """
+
+        return self.width * self.height
+
+    def get_description(self) -> str:
+        """
+        Shows Rectangle description
+        """
+        return f"This is Rectangle with {self.width} width and {self.height} height."
+
+
+# shape1 = Shape("Shape")
+# # print(shape1.area())
+# print(shape1.get_description())
+#
+# c1 = Circle("c1", 10)
+# print(c1.get_description())
+# print(c1.area())
+#
+# r1 = Rectangle("r1", 10, 5)
+# print(r1.get_description())
+# print(r1.area())
+
+
+class TestShapes(unittest.TestCase):
+    """
+    Tests for testing the behiviour of different shapes
+    """
+
+    def test_shape_area_ok(self):
+        # Test the base class behavior
+
+        sh = Shape("sh01")
+        self.assertRaises(NotImplementedError, sh.area)
+
+    def test_circle_area_ok(self):
+        # Test the Circle area method
+
+        c1 = Circle("c1", 10)
+        area = c1.area()
+        # This allows the value to be off by 0.0001
+        self.assertAlmostEqual(area, 314.15926, delta=0.0001)
+
+    def test_rectangle_area_ok(self):
+        # Test the Rectangle area method
+
+        r1 = Rectangle("r1", 5, 10)
+        area = r1.area()
+        self.assertEqual(area, 50)
+
+    def test_get_description_polyphormic_list_iterations(self):
+        # Test the get_description Polymorphism
+        shapes = [Shape("sh1"), Circle("c1", 10), Rectangle("r1", 5, 10)]
+        expected_outputs = [
+            "This is a generic Shape.",
+            "This is Circle with radius 10.",
+            "This is Rectangle with 5 width and 10 height.",
+        ]
+        for index, shape in enumerate(shapes):
+            self.assertEqual(shape.get_description(), expected_outputs[index])
+
+    def test_area_polyphormic_list_iterations(self):
+        # Test the area Polymorphism
+        shapes = [Shape("sh1"), Circle("c1", 10), Rectangle("r1", 5, 10)]
+        expected_outputs = [
+            "NotImplementedError",
+            314.159265,
+            50,
+        ]
+        for index, shape in enumerate(shapes):
+            try:
+                self.assertAlmostEqual(
+                    shape.area(), expected_outputs[index], delta=0.0001
+                )
+            except NotImplementedError:
+                self.assertEqual("NotImplementedError", expected_outputs[index])
+
+
+if __name__ == "__main__":
+    unittest.main()
