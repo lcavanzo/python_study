@@ -149,7 +149,7 @@ class TestUserPermissions(unittest.TestCase):
             else:
                 self.assertFalse(editor01.has_permission(action))
 
-    def test_all_users_has_permissions(self):
+    def test_all_users_has_permissions_edit_content(self):
         """
         test User AdminUser and EditorUser classes has_permission() works
         """
@@ -158,16 +158,56 @@ class TestUserPermissions(unittest.TestCase):
             AdminUser("luis", "luis@linux.com"),
             EditorUser("tyrone", "tyrone@linux.com"),
         ]
-        actions = [
-            "delete_user",
-            "edit_content",
+
+        for user in users:
+            if isinstance(user, AdminUser) or isinstance(user, EditorUser):
+                self.assertTrue(user.has_permission("edit_content"))
+            elif isinstance(user, User):
+                self.assertFalse(user.has_permission("edit_content"))
+
+    def test_all_users_has_permissions_delete_user(self):
+        """
+        test User AdminUser and EditorUser classes has_permission() works
+        """
+        users = [
+            User("lcavanzo", "lcavanzo@linux.com"),
+            AdminUser("luis", "luis@linux.com"),
+            EditorUser("tyrone", "tyrone@linux.com"),
         ]
 
-        for user, action in zip(users, actions):
-            if action == "view_content" or action == "edit_content":
-                self.assertTrue(user.has_permission(action))
-            else:
-                self.assertFalse(user.has_permission(action))
+        for user in users:
+            if isinstance(user, AdminUser):
+                self.assertTrue(user.has_permission("delete_user"))
+            elif isinstance(user, User) or isinstance(user, EditorUser):
+                self.assertFalse(user.has_permission("delete_user"))
+
+    def test_polymorphic_has_permission(self):
+        """
+        Tests has_permission for various user types and actions using a data-driven approach.
+        """
+        test_cases = [
+            # User type, action, expected_permission
+            (User("user0", "u0@ex.com"), "edit_content", False),
+            (User("user1", "u1@ex.com"), "delete_user", False),
+            (User("user2", "u2@ex.com"), "view_content", False),
+            (AdminUser("admin0", "a0@ex.com"), "edit_content", True),
+            (AdminUser("admin1", "a1@ex.com"), "delete_user", True),
+            (AdminUser("admin2", "a2@ex.com"), "view_content", True),
+            (AdminUser("admin3", "a3@ex.com"), "create_report", True),
+            (EditorUser("editor0", "e0@ex.com"), "edit_content", True),
+            (EditorUser("editor1", "e1@ex.com"), "view_content", True),
+            (EditorUser("editor2", "e2@ex.com"), "delete_user", False),
+            (EditorUser("editor3", "e3@ex.com"), "publish_article", False),
+        ]
+
+        for user_instance, action, expected_permission in test_cases:
+            with self.subTest(user=user_instance.username, action=action):
+                actual_permission = user_instance.has_permission(action)
+                self.assertEqual(
+                    actual_permission,
+                    expected_permission,
+                    f"Permission mismatch for {user_instance.__class__.__name__} '{user_instance.username}' on action '{action}'",
+                )
 
 
 if __name__ == "__main__":
