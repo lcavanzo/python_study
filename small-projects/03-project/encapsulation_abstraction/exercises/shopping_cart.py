@@ -22,47 +22,67 @@ Task:
 
 class ShoppingCart:
     def __init__(self, customer_name):
-        self.customer_name = customer_name
-        self.items = {}  # {product_name: quantity}
-        self.discount_applied = False
-        self.total_price = 0.0
+        self._customer_name = customer_name
+        self._items = {}  # {product_name: quantity}
+        self._discount_applied = False
+        self._total_price = 0.0
 
     def add_item(self, product_name, price, quantity):
-        if product_name in self.items:
-            self.items[product_name]["quantity"] += quantity
+        if product_name in self._items:
+            self._items[product_name]["quantity"] += quantity
         else:
-            self.items[product_name] = {"price": price, "quantity": quantity}
+            self._items[product_name] = {"price": price, "quantity": quantity}
         self._calculate_total()
 
     def remove_item(self, product_name, quantity):
-        if product_name in self.items:
-            if self.items[product_name]["quantity"] <= quantity:
-                del self.items[product_name]
+        if product_name in self._items:
+            if self._items[product_name]["quantity"] <= quantity:
+                del self._items[product_name]
             else:
-                self.items[product_name]["quantity"] -= quantity
+                self._items[product_name]["quantity"] -= quantity
             self._calculate_total()
         else:
             print(f"{product_name} not in cart.")
 
     def apply_discount(self, percentage):
-        if not self.discount_applied and 0 < percentage <= 100:
-            self.total_price *= 1 - percentage / 100
-            self.discount_applied = True
+        if not self._discount_applied and 0 < percentage <= 100:
+            self._total_price *= 1 - percentage / 100
+            self._discount_applied = True
             print(f"{percentage}% discound applied.")
         else:
             print("Discount already applied or invalid percentage.")
 
+    @property
+    def total_price(self):
+        return self._total_price
+
     def _calculate_total(self):
         current_total = 0.0
-        for product_name, details in self.items.items():
+        for product_name, details in self._items.items():
             current_total += details["price"] * details["quantity"]
-        self.total_price = current_total
-        self.discount_applied = False  # Recalculate total, reset discounts status
+        self._total_price = current_total
+        self._discount_applied = False  # Recalculate total, reset discounts status
         print(f"Cart total updated to: {self.total_price}")
 
     def get_cart_summary(self):
-        summary = f"Cart for {self.customer_name}:\n"
-        for product_name, details in self.items.items():
+        summary = f"Cart for {self._customer_name}:\n"
+        for product_name, details in self._items.items():
             summary += f"- {product_name} (x{details['quantity']}): ${details['price'] * details['quantity']:.2f}\n"
         summary += f"Total: ${self.total_price:.2f}"
         return summary
+
+
+# Testing behaviour
+shopping = ShoppingCart("Luis")
+shopping.add_item(
+    "playstation 5",
+    5000,
+    1,
+)
+shopping.add_item(
+    "pixel phone",
+    3500,
+    2,
+)
+print()
+print(shopping.get_cart_summary())
