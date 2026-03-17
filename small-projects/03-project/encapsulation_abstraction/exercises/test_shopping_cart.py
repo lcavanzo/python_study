@@ -56,7 +56,7 @@ class ShoppingCart:
             self._discount_applied = True
             # print(f"{percentage}% discound applied.")
         else:
-            # print("Discount already applied or invalid percentage.")
+            print("Discount already applied or invalid percentage.")
 
     @property
     def total_price(self):
